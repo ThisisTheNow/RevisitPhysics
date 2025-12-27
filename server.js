@@ -1,8 +1,18 @@
 const express = require("express");
 const cors = require("cors");
 
+const ALLOWED_ORIGIN = "https://revisitphysicss.onrender.com";
+
 const app = express();
-app.use(cors());
+
+app.use(cors({
+  origin: ALLOWED_ORIGIN,
+  methods: ["POST"],
+  allowedHeaders: ["Content-Type"]
+}));
+
+
+
 app.use(express.json());
 
 const answers = {
