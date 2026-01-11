@@ -96,7 +96,34 @@ app.post("/auth/register", async (req, res) => {
 
 
 });
+app.post("/auth/login", async (req, res) => {
+  const { username, password } = req.body || {};
+  if (!username || !password) {
+    return res.status(400).json({ error: "Enter both a username and password" })
+  };
+  if (typeof username !== "string" || typeof password !== "string") {
+  return res.status(400).json({ error: "username and password must be strings" })
+  };
+  const userResult = await pool.query(
+  "SELECT id, password_hash FROM users WHERE username = $1",
+  [username]
+  );
+  if (userResult.rows.length === 0) {
+  return res.status(401).json({ error: " Couldnt find your Password or Username man" });
+  };
+  const passwordMatches = await bcrypt.compare(
+  password,
+  userResult.rows[0].password_hash
+  );
+  if (!passwordMatches) {
+  return res.status(401).json({ error: "Couldnt find your Password or Username man" });
+  };
+  return res.json({ ok: true, userId: userResult.rows[0].id });
 
+
+
+
+});
 
 
 
