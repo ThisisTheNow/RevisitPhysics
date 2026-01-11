@@ -53,6 +53,59 @@ const answers = {
   4: "a"
 };
 
+
+//authenticationnnnns
+app.post("/auth/register", async (req, res) => {
+  const { username, password } = req.body || {};
+  if (!username || !password) {
+    return res.status(400).json({ error: "Bruh you can't sign in with just username or password, Lockin" });
+  }
+  if (typeof username !== "string" || typeof password !== "string") {
+    return res.status(400).json({ error: "Your Username and pass has to be a string" });
+  }
+  const cleanUsername = username.trim();
+
+  if (cleanUsername.length < 3) {
+    return res.status(400).json({ error: "username must be at least 3 characters, no less dude" });
+  }
+  if (password.includes(" ")) {
+    return res.status(400).json({ error: "password cannot contain spaces" });
+  }
+  if (password.length < 8) {
+  return res.status(400).json({ error: "password must be at least 8 characters" });
+  }
+  const passwordHash = await bcrypt.hash(password, 10);
+  try {
+  await pool.query(
+    "INSERT INTO users (username, password_hash) VALUES ($1, $2)",
+    [cleanUsername, passwordHash]
+  );
+
+  return res.json({ ok: true });
+  } 
+  catch (err) {
+  if (err && err.code === "23505") {
+    return res.status(409).json({ error: "username already exists" });
+  }
+
+  console.error("register error:", err);
+  return res.status(500).json({ error: "server error" });
+  }
+
+
+
+
+});
+
+
+
+
+
+
+
+
+
+
 app.post("/check", (req, res) => {
   const { question, answer } = req.body;
   const correct = answers[question];
