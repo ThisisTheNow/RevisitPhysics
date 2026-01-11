@@ -10,7 +10,7 @@ app.use(cors({
   methods: ["POST", "GET"],
   allowedHeaders: ["Content-Type", "Authorization"]
 }));
-
+const bcrypt = require("bcryptjs");
 
 
 app.use(express.json());
