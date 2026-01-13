@@ -147,7 +147,25 @@ app.post("/progress/save", async (req, res) => {
     return res.status(500).json({ error: "server error" });
   }
 });
-
+app.get("/progress/load", async (req, res) => {
+  const userId = Number(req.query.userId);
+  if (!Number.isInteger(userId)) {
+  return res.status(400).json({ error: "That isnt a valid user id" });
+  };
+  try{
+    const result = await pool.query(
+    `SELECT quiz_id, score, total, updated_at
+    FROM progress
+    WHERE user_id = $1
+    ORDER BY updated_at DESC`,
+    [userId]
+    );
+    return res.json({ ok: true, progress: result.rows });
+  }
+  catch (err) {
+    console.error("Tried loading Progress but it led to a load error:", err);
+    return res.status(500).json({ error: "server error" });}
+});
 
 
 
