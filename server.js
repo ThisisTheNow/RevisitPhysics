@@ -121,12 +121,32 @@ app.post("/auth/login", async (req, res) => {
   return res.json({ ok: true, userId: userResult.rows[0].id });
   
   
-
-
-
 });
-
-
+//Save Progress API endpoint i will do my progress saving here
+app.post("/progress/save", async (req, res) => {
+  const { userId, quizId, score, total } = req.body || {};
+  if (!userId || !quizId || score === undefined || total === undefined) {
+    return res.status(400).json({ error: "userId, quizId score and total are all needed" });
+ }
+  if (!Number.isInteger(userId) || typeof quizId !== "string" || !Number.isInteger(score) || !Number.isInteger(total)) {
+    return res.status(400).json({ error: "UserId must be a interger QuizID must be a string Score and Total must be integers" });};
+  if (score < 0 || total <= 0 || score > total) {
+    return res.status(400).json({ error: "score must be between 0 and total, and total must be > 0" });};
+  try{
+    await pool.query(
+  `INSERT INTO progress (user_id, quiz_id, score, total)
+   VALUES ($1, $2, $3, $4)
+   ON CONFLICT (user_id, quiz_id)
+   DO UPDATE SET score = EXCLUDED.score, total = EXCLUDED.total, updated_at = NOW()`,
+  [userId, quizId, score, total]
+    );
+  return res.json({ ok: true });
+  }
+  catch (err) {
+    console.error("Tried saving Progress but it led to a save error:", err);
+    return res.status(500).json({ error: "server error" });
+  }
+});
 
 
 
